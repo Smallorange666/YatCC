@@ -56,7 +56,8 @@ print_token()
     outFile << "\t[StartOfLine]";
   if (lex::g.mLeadingSpace)
     outFile << "\t[LeadingSpace]";
-  outFile << "\tLoc=<0:0>\n";
+  outFile << "\tLoc=<" << lex::g.mFile << ":" << lex::g.mLine << ":"
+          << lex::g.mColumn << ">\n";
   outFile << std::flush;
 }
 

@@ -4,6 +4,7 @@
   "files.eol": "\n",
   "files.autoSave": "afterDelay",
   "files.associations": {
+    "*.md": "markdown",
     "*.json": "jsonc",
     "TODO": "markdown",
     ".clang-tidy": "yaml",
@@ -82,7 +83,9 @@
     "cinttypes": "cpp",
     "typeindex": "cpp",
     "typeinfo": "cpp",
-    "variant": "cpp"
+    "variant": "cpp",
+    "*.inc": "cpp",
+    "unordered_set": "cpp"
   },
 
   //* C/C++

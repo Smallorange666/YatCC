@@ -1,8 +1,8 @@
 #pragma once
 
+#include <cstring>
 #include <string>
 #include <string_view>
-#include <cstring>
 
 namespace lex {
 
@@ -12,21 +12,84 @@ enum Id
   YYEOF = 0,     /* "end of file"  */
   YYerror = 256, /* error  */
   YYUNDEF = 257, /* "invalid token"  */
+
   IDENTIFIER,
   CONSTANT,
   STRING_LITERAL,
+
+  AUTO,
+  CHAR,
+  CONST,
+  DOUBLE,
+  ENUM,
+  EXTERN,
+  FLOAT,
+  INLINE,
   INT,
+  LONG,
+  REGISTER,
+  RESTRICT,
+  SHORT,
+  SIGNED,
+  STATIC,
+  STRUCT,
+  TYPEDEF,
+  UNION,
+  UNSIGNED,
+  VOID,
+  VOLATILE,
+
+  BREAK,
+  CASE,
+  CONTINUE,
+  DEFAULT,
+  DO,
+  ELSE,
+  FOR,
+  GOTO,
+  IF,
   RETURN,
-  L_BRACE,
-  R_BRACE,
-  L_SQUARE,
-  R_SQUARE,
+  SWITCH,
+  WHILE,
+
+  SIZEOF,
+
   L_PAREN,
   R_PAREN,
-  SEMI,
-  EQUAL,
+  L_SQUARE,
+  R_SQUARE,
+  L_BRACE,
+  R_BRACE,
+
   PLUS,
-  COMMA
+  MINUS,
+  STAR,
+  SLASH,
+  PERCENT,
+  GREATER,
+  LESS,
+  GREATEREQUAL,
+  LESSEQUAL,
+  EQUALEQUAL,
+  EXCLAIMEQUAL,
+  AMPAMP,
+  PIPEPIPE,
+  EXCLAIM,
+  AMP,
+  PIPE,
+  XOR,
+  NOT_BIT,
+  SHIFT_L,
+  SHIFT_R,
+  INC,
+  DEC,
+  ARROW,
+  DOT,
+
+  SEMI,
+  COMMA,
+
+  EQUAL,
 };
 
 const char*
