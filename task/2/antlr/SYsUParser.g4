@@ -14,7 +14,7 @@ primaryExpression
 postfixExpression
     :   primaryExpression  
     |   postfixExpression LeftParen argumentExpressionList? RightParen
-    |   postfixExpression LeftBrace expression RightBrace
+    |   postfixExpression LeftSquare expression RightSquare
     ;
 
 argumentExpressionList
@@ -64,18 +64,13 @@ expression
     ;
 
 declaration
-    :   declarationSpecifiers initDeclaratorList? Semi
+    :   declarationSpecifiers initDeclaratorList Semi
     ;
 
 declarationSpecifiers
-    :   declarationSpecifier+
-    |   declarationSpecifier+ declarationSpecifiers
-    ;
-
-declarationSpecifier
-    :   typeSpecifier
-    |   typeQualifier
-    ;
+    :   typeSpecifier declarationSpecifiers?
+    |   typeQualifier declarationSpecifiers?
+    ; 
 
 initDeclaratorList
     :   initDeclarator (Comma initDeclarator)*
@@ -84,7 +79,6 @@ initDeclaratorList
 initDeclarator
     :   declarator (Equal initializer)?
     ;
-
 
 typeSpecifier
     :   Void

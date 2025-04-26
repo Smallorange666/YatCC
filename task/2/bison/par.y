@@ -61,12 +61,10 @@ void yyerror (char const *);	// 该函数定义在 par.cpp 中
 %type <TranslationUnit> translation_unit
 
 %token <RawStr> IDENTIFIER CONSTANT STRING_LITERAL
-%token AUTO CHAR CONST DOUBLE ENUM EXTERN FLOAT INLINE INT LONG
-%token REGISTER RESTRICT SHORT SIGNED STATIC STRUCT TYPEDEF UNION UNSIGNED VOID VOLATILE
-%token BREAK CASE CONTINUE DEFAULT DO ELSE FOR GOTO IF RETURN SWITCH WHILE
-%token SIZEOF
+%token VOID INT CHAR LONG CONST
+%token BREAK CONTINUE DO ELSE IF RETURN WHILE
 %token L_PAREN R_PAREN L_BRACE R_BRACE L_SQUARE R_SQUARE
-%token PLUS MINUS STAR SLASH PERCENT GREATER LESS GREATEREQUAL LESSEQUAL EQUALEQUAL EXCLAIMEQUAL AMPAMP PIPEPIPE EXCLAIM AMP
+%token PLUS MINUS STAR SLASH PERCENT GREATER LESS GREATEREQUAL LESSEQUAL EQUALEQUAL EXCLAIMEQUAL AMPAMP PIPEPIPE EXCLAIM
 %token SEMI COMMA 
 %token EQUAL
 
@@ -74,8 +72,6 @@ void yyerror (char const *);	// 该函数定义在 par.cpp 中
 %start start
 
 %%
-
-// 起始符号
 start
   :	{
       par::Symtbl::g = new par::Symtbl();
@@ -104,8 +100,6 @@ translation_unit
     }
   ;
 
-// 外部声明 -> 函数定义 
-// int a()
 external_declaration
   : function_definition
     {
@@ -115,8 +109,6 @@ external_declaration
   | declaration { $$ = $1; }
   ;
 
-// 函数定义 -> 声明说明符 声明符 复合语句
-// int a(){}
 function_definition
   : declaration_specifiers declarator
     {
@@ -138,8 +130,6 @@ function_definition
     }
   ;
 
-// 声明 -> 声明说明符 初始化声明符列表;
-// int a, b, c;
 declaration
   : declaration_specifiers init_declarator_list SEMI
     {
@@ -162,15 +152,6 @@ declaration
     }
   ;
 
-
-// 声明说明符 -> 类型说明符
-// int
-// 声明说明符 -> 类型说明符 声明说明符
-// unsigned int
-// 声明说明符 -> 类型限定符
-// const
-// 声明说明符 -> 类型限定符 声明说明符
-// const int
 declaration_specifiers
   : type_specifier { $$ = $1; }
   | type_specifier declaration_specifiers
@@ -190,10 +171,6 @@ declaration_specifiers
     } 
   ;
 
-// 初始化声明符列表 -> 初始化声明符
-// a
-// 初始化声明符列表 -> 初始化声明符列表, 初始化声明符
-// a, b
 init_declarator_list
   : init_declarator
     {

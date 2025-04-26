@@ -46,7 +46,7 @@ public:
 
   Expr* operator()(ast::LogicalAndExpressionContext* ctx);
 
-  Expr* operator()(ast::EqualityContext* ctx);
+  Expr* operator()(ast::EqualityExpressionContext* ctx);
 
   Expr* operator()(ast::RelationalExpressionContext* ctx);
 
@@ -72,7 +72,17 @@ public:
 
   Stmt* operator()(ast::ExpressionStatementContext* ctx);
 
+  Stmt* operator()(ast::IfStatementContext* ctx);
+
+  Stmt* operator()(ast::WhileStatementContext* ctx);
+
+  Stmt* operator()(ast::DoStatementContext* ctx);
+
   Stmt* operator()(ast::JumpStatementContext* ctx);
+
+  Stmt* operator()(ast::BreakStatementContext* ctx);
+
+  Stmt* operator()(ast::ContinueStatementContext* ctx);
 
   //============================================================================
   // 声明
