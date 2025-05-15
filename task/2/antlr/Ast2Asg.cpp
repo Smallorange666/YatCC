@@ -51,7 +51,6 @@ Ast2Asg::operator()(ast::TranslationUnitContext* ctx)
     } else if (auto p = i->functionDefinition()) {
       auto funcDecl = self(p);
       ret->decls.push_back(funcDecl);
-
       // 添加到声明表
       localDecls[funcDecl->name] = funcDecl;
     } else
@@ -82,9 +81,9 @@ Ast2Asg::operator()(ast::DeclarationSpecifiersContext* ctx)
         else if (p->Long())
           ret.first = Type::Spec::kLong;
         else
-          ABORT(); // 至多一个类型说明符
+          ABORT(); // 未知的类型说明符
       } else
-        ABORT(); // 未知的类型说明符
+        ABORT(); // 至多一个类型说明符
     } else if (auto p = i->typeQualifier()) {
       if (p->Const())
         ret.second.const_ = true;
@@ -182,14 +181,42 @@ Ast2Asg::operator()(ast::DirectDeclaratorContext* ctx, TypeExpr* sub)
     else
       arrayType->len = ArrayType::kUnLen;
 
-    return self(ctx->directDeclarator(), arrayType);
+    return self(ctx->directDeclarator(), arrayType); // 递归处理
   }
 
   if (ctx->LeftParen()) {
-    // ?
+    auto funcType = make<FunctionType>();
+    funcType->sub = sub;
+
+    if (auto p = ctx->parameterList()) {
+      for (auto&& i : p->parameterDeclaration()) {
+        funcType->params.push_back(self(i)->type);
+      }
+    }
+
+    return self(ctx->directDeclarator(), funcType); // 递归处理
   }
 
   ABORT();
+}
+
+Decl*
+Ast2Asg::operator()(ast::ParameterDeclarationContext* ctx)
+{
+  auto ty = make<asg::Type>();
+
+  auto specqual = self(ctx->declarationSpecifiers());
+  auto [texp, name] = self(ctx->declarator(), nullptr);
+
+  ty->spec = specqual.first;
+  ty->qual = specqual.second;
+  ty->texp = texp;
+
+  auto decl = make<asg::Decl>();
+  decl->type = ty;
+  decl->name = std::move(name);
+
+  return decl;
 }
 
 //==============================================================================
@@ -444,38 +471,39 @@ Ast2Asg::operator()(ast::UnaryExpressionContext* ctx)
 Expr*
 Ast2Asg::operator()(ast::PostfixExpressionContext* ctx)
 {
-  auto children = ctx->children;
   if (auto p = ctx->primaryExpression()) {
-
+    auto children = ctx->children;
     Expr* ret = self(dynamic_cast<ast::PrimaryExpressionContext*>(children[0]));
     return ret;
   }
 
-  Expr* ret = self(dynamic_cast<ast::PostfixExpressionContext*>(children[0]));
-
-  if (ctx->LeftParen()) {
-    auto p = make<CallExpr>();
-    p->head = ret;
-    for (unsigned i = 2; i < children.size() - 1; ++i) {
-      if (auto q = dynamic_cast<ast::ExpressionContext*>(children[i]))
-        p->args.push_back(self(q));
+  if (auto p = ctx->postfixExpression()) {
+    if (ctx->LeftParen()) {
+      auto children = ctx->children;
+      auto p = make<CallExpr>();
+      p->head = p;
+      for (unsigned i = 2; i < children.size() - 1; ++i) {
+        if (auto q = dynamic_cast<ast::ExpressionContext*>(children[i]))
+          p->args.push_back(self(q));
+      }
+      return p;
     }
-    return p;
+
+    if (ctx->LeftSquare()) {
+      auto p = make<BinaryExpr>();
+      p->op = p->kIndex;
+      p->lft = p;
+      p->rht = self(ctx->expression());
+      return p;
+    }
   }
 
-  if (ctx->LeftSquare()) {
-    auto p = make<BinaryExpr>();
-    p->op = p->kIndex;
-    p->lft = ret;
-    p->rht = self(ctx->expression());
-    return p;
-  }
+  ABORT();
 }
 
 Expr*
 Ast2Asg::operator()(ast::PrimaryExpressionContext* ctx)
 {
-
   if (auto p = ctx->Identifier()) {
     auto name = p->getText();
     auto ret = make<DeclRefExpr>();
@@ -513,22 +541,25 @@ Ast2Asg::operator()(ast::InitializerContext* ctx)
   if (auto p = ctx->assignmentExpression())
     return self(p);
 
-  auto ret = make<InitListExpr>();
+  if (ctx->LeftBrace()) {
+    auto ret = make<InitListExpr>();
 
-  if (auto p = ctx->initializerList()) {
-    for (auto&& i : p->initializer()) {
-      // 将初始化列表展平
-      auto expr = self(i);
-      if (auto p = expr->dcst<InitListExpr>()) {
-        for (auto&& sub : p->list)
-          ret->list.push_back(sub);
-      } else {
-        ret->list.push_back(expr);
+    if (auto p = ctx->initializerList()) {
+      for (auto&& i : p->initializer()) {
+        // 将初始化列表展平
+        auto expr = self(i);
+        if (auto p = expr->dcst<InitListExpr>()) {
+          for (auto&& sub : p->list)
+            ret->list.push_back(sub);
+        } else {
+          ret->list.push_back(expr);
+        }
       }
     }
+    return ret;
   }
 
-  return ret;
+  ABORT();
 }
 
 //==============================================================================
@@ -637,15 +668,11 @@ Ast2Asg::operator()(ast::DoStatementContext* ctx)
 Stmt*
 Ast2Asg::operator()(ast::JumpStatementContext* ctx)
 {
-  if (ctx->Return()) {
-    auto ret = make<ReturnStmt>();
-    ret->func = mCurrentFunc;
-    if (auto p = ctx->expression())
-      ret->expr = self(p);
-    return ret;
-  }
-
-  ABORT();
+  auto ret = make<ReturnStmt>();
+  ret->func = mCurrentFunc;
+  if (auto p = ctx->expression())
+    ret->expr = self(p);
+  return ret;
 }
 
 Stmt*
@@ -736,9 +763,7 @@ Ast2Asg::operator()(ast::InitDeclaratorContext* ctx, SpecQual sq)
     fdecl->body = nullptr;
 
     ret = fdecl;
-  }
-
-  else {
+  } else {
     auto vdecl = make<VarDecl>();
     auto type = make<Type>();
     vdecl->type = type;

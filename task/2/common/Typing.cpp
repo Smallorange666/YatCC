@@ -383,6 +383,7 @@ Typing::operator()(ReturnStmt* obj)
 {
   auto& ftype = obj->func->type;
   auto ftexp = dynamic_cast<FunctionType*>(ftype->texp);
+
   if (ftexp == nullptr || ftexp->sub != nullptr)
     ABORT();
 

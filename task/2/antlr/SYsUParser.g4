@@ -68,8 +68,12 @@ declaration
     ;
 
 declarationSpecifiers
-    :   typeSpecifier declarationSpecifiers?
-    |   typeQualifier declarationSpecifiers?
+    : declarationSpecifier+
+    ;
+
+declarationSpecifier
+    :   typeSpecifier 
+    |   typeQualifier 
     ; 
 
 initDeclaratorList
@@ -98,9 +102,8 @@ declarator
 
 directDeclarator
     :   Identifier
-    |   LeftSquare assignmentExpression? RightSquare
-    |   LeftParen parameterList? RightParen
-    |   directDeclarator LeftBrace assignmentExpression? RightBrace
+    |   directDeclarator LeftSquare assignmentExpression? RightSquare
+    |   directDeclarator LeftParen parameterList? RightParen
     ;
 
 parameterList
@@ -111,17 +114,14 @@ parameterDeclaration
     :   declarationSpecifiers declarator
     ;
 
-identifierList
-    :   Identifier (Comma Identifier)*
-    ;
-
 initializer
     :   assignmentExpression
-    |   LeftBrace initializerList? Comma? RightBrace
+    |   LeftBrace initializerList RightBrace
     ;
 
 initializerList
-    :   initializer (Comma initializer)*
+    :   initializer?
+    |   initializer (Comma initializer)*
     ;
 
 statement

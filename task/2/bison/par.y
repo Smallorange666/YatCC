@@ -184,10 +184,7 @@ init_declarator_list
     }
   ;
 
-// 初始化声明符 -> 声明符
-// a
-// 初始化声明符 -> 声明符 = 初始化器
-// a = 1
+
 init_declarator
   : declarator { $$ = $1; }
   | declarator EQUAL initializer
@@ -200,7 +197,6 @@ init_declarator
     }
   ;
 
-// 初始化右值
 initializer
   : assignment_expression
     {
@@ -226,13 +222,8 @@ initializer
     {
       $$ = $2;
     }
-  | L_BRACE initializer_list COMMA R_BRACE
-    {
-      $$ = $2;
-    }
   ;
 
-// 初始化列表
 initializer_list
   :  %empty
     {
@@ -252,7 +243,6 @@ initializer_list
     }
   ;
 
-// 类型说明符
 type_specifier
   : VOID
     {
@@ -283,16 +273,6 @@ type_qualifier
       $$->qual.const_=true;
     }
 
-// 声明符 -> 标识符
-// a
-// 声明符 -> 声明符 [ ]
-// a[]
-// 声明符 -> 声明符 [ 表达式 ]
-// a[1] 或 a[3+4]
-// 声明符 -> 声明符 ( ) 
-// a()
-// 声明符 -> 声明符 ( 参数列表 )
-// a(int, int)
 declarator
   : IDENTIFIER
     {

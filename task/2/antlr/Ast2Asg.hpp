@@ -90,6 +90,8 @@ public:
 
   std::vector<Decl*> operator()(ast::DeclarationContext* ctx);
 
+  Decl* operator()(ast::ParameterDeclarationContext* ctx);
+
   FunctionDecl* operator()(ast::FunctionDefinitionContext* ctx);
 
   Decl* operator()(ast::InitDeclaratorContext* ctx, SpecQual sq);
