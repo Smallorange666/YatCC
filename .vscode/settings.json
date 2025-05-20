@@ -86,7 +86,11 @@
     "variant": "cpp",
     "*.inc": "cpp",
     "unordered_set": "cpp",
-    "*.def": "cpp"
+    "*.def": "cpp",
+    "codecvt": "cpp",
+    "forward_list": "cpp",
+    "ranges": "cpp",
+    "valarray": "cpp"
   },
 
   //* C/C++
