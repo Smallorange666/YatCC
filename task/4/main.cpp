@@ -6,10 +6,15 @@
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Support/raw_ostream.h>
 
+#include "CSE.hpp"
 #include "ConstantFolding.hpp"
+#include "ConstantPropagation.hpp"
+#include "DCE.hpp"
+#include "InstructionCombining.hpp"
 #include "Mem2Reg.hpp"
 #include "StaticCallCounter.hpp"
 #include "StaticCallCounterPrinter.hpp"
+#include "StrengthReduction.hpp"
 
 #ifdef TASK4_LLM
 
@@ -55,8 +60,8 @@ opt(llvm::Module& mod)
 
   // 添加 LLM 加持的 Pass 到优化管理器中
   mpm.addPass(PassSequencePredict(
-    "<api_key>",
-    "<base_url>",
+    "",
+    "https://llm.yatcc-ai.com/v1",
     {
       { "StaticCallCounterPrinter",
         TASK4_DIR "/StaticCallCounterPrinter.hpp",
@@ -77,15 +82,53 @@ opt(llvm::Module& mod)
         [](llvm::ModulePassManager& mpm) {
           mpm.addPass(ConstantFolding(llvm::errs()));
         } },
+      { "StrengthReduction",
+        TASK4_DIR "/StrengthReduction.hpp",
+        TASK4_DIR "/StrengthReduction.cpp",
+        "StrengthReduction.xml",
+        [](llvm::ModulePassManager& mpm) {
+          mpm.addPass(StrengthReduction(llvm::errs()));
+        } },
+      { "InstructionCombining",
+        TASK4_DIR "/InstructionCombining.hpp",
+        TASK4_DIR "/InstructionCombining.cpp",
+        "InstructionCombining.xml",
+        [](llvm::ModulePassManager& mpm) {
+          mpm.addPass(InstructionCombining(llvm::errs()));
+        } },
+      { "ConstantPropagation",
+        TASK4_DIR "/ConstantPropagation.hpp",
+        TASK4_DIR "/ConstantPropagation.cpp",
+        "ConstantPropagation.xml",
+        [](llvm::ModulePassManager& mpm) {
+          mpm.addPass(ConstantPropagation(llvm::errs()));
+        } },
+      { "CSE",
+        TASK4_DIR "/CSE.hpp",
+        TASK4_DIR "/CSE.cpp",
+        "CSE.xml",
+        [](llvm::ModulePassManager& mpm) { mpm.addPass(CSE(llvm::errs())); } },
+      { "DCE",
+        TASK4_DIR "/DCE.hpp",
+        TASK4_DIR "/DCE.cpp",
+        "DCE.xml",
+        [](llvm::ModulePassManager& mpm) { mpm.addPass(DCE(llvm::errs())); } },
     }));
 
 #else
 
   // 传统 LLVM Pass 来进行编译优化
   // 添加优化pass到管理器中
-  mpm.addPass(StaticCallCounterPrinter(llvm::errs()));
   mpm.addPass(Mem2Reg());
+  mpm.addPass(ConstantPropagation(llvm::errs()));
+  mpm.addPass(StrengthReduction(llvm::errs()));
+  mpm.addPass(InstructionCombining(llvm::errs()));
+  mpm.addPass(DCE(llvm::errs()));
   mpm.addPass(ConstantFolding(llvm::errs()));
+  mpm.addPass(StrengthReduction(llvm::errs()));
+  mpm.addPass(InstructionCombining(llvm::errs()));
+  mpm.addPass(CSE(llvm::errs()));
+  mpm.addPass(DCE(llvm::errs()));
 
 #endif
 
